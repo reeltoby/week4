@@ -1,0 +1,118 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>ArcGIS API for JavaScript Tutorials: Find service areas</title>
+  <style>
+    html, body, #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+  <link rel="stylesheet" href="https://js.arcgis.com/4.18/esri/themes/light/main.css">
+  <script src="https://js.arcgis.com/4.18/"></script>
+
+  <script>
+
+    require([
+      "esri/config",
+      "esri/Map",
+      "esri/views/MapView",
+      "esri/tasks/ServiceAreaTask",
+      "esri/tasks/support/ServiceAreaParameters",
+      "esri/tasks/support/FeatureSet",
+      "esri/Graphic"
+    ], function(esriConfig,Map, MapView, ServiceAreaTask, ServiceAreaParams, FeatureSet, Graphic) {
+
+      esriConfig.apiKey = "AAPKaaf84bda91ad449192d19d43a8bd56f0lU9mp0HC9lhKN933s7ZTPNuXCGfh4RDs-cjQOV2mzpwAAsS4VDAoEl92nx7BPpI4";
+
+      const map = new Map({
+        basemap: "arcgis-navigation"
+      });
+
+      const view = new MapView({
+        container: "viewDiv",
+        map: map,
+        center: [-79.2469,43.1594], //Longitude, latitude
+        zoom: 13
+      });
+
+      const serviceAreaTask = new ServiceAreaTask({
+        url: "https://route.arcgis.com/arcgis/rest/services/World/ServiceAreas/NAServer/ServiceArea_World/solveServiceArea"
+      });
+
+      view.on("click", function(event){
+
+        const locationGraphic = createGraphic(event.mapPoint);
+
+        const driveTimeCutoffs = [5,10,15]; // Minutes
+        const serviceAreaParams = createServiceAreaParams(locationGraphic, driveTimeCutoffs, view.spatialReference);
+
+        executeServiceAreaTask(serviceAreaParams);
+
+      });
+
+      // Create the location graphic
+      function createGraphic(point) {
+        view.graphics.removeAll();
+        const graphic = new Graphic({
+          geometry: point,
+          symbol: {
+            type: "simple-marker",
+            color: "white",
+            size: 8
+          }
+        });
+
+        view.graphics.add(graphic);
+        return graphic;
+      }
+
+      function createServiceAreaParams(locationGraphic, driveTimeCutoffs, outSpatialReference) {
+
+        // Create one or more locations (facilities) to solve for
+        const featureSet = new FeatureSet({
+          features: [locationGraphic]
+        });
+
+        // Set all of the input parameters for the service
+        const taskParameters = new ServiceAreaParams({
+          facilities: featureSet,
+          defaultBreaks: driveTimeCutoffs,
+          trimOuterPolygon: true,
+          outSpatialReference: outSpatialReference
+        });
+        return taskParameters;
+
+      }
+
+      function executeServiceAreaTask(serviceAreaParams) {
+
+        return serviceAreaTask.solve(serviceAreaParams)
+          .then(function(result){
+            if (result.serviceAreaPolygons.length) {
+              // Draw each service area polygon
+              result.serviceAreaPolygons.forEach(function(graphic){
+                graphic.symbol = {
+                  type: "simple-fill",
+                  color: "rgba(255,50,50,.25)"
+                }
+                view.graphics.add(graphic,0);
+              });
+            }
+          }, function(error){
+            console.log(error);
+          });
+
+      }
+
+    });
+  </script>
+
+</head>
+<body>
+  <div id="viewDiv"></div>
+</body>
+</html>
