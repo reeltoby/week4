@@ -1,0 +1,123 @@
+<html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>After Lock Down</title>
+  <style>
+    html, body, #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+  <link rel="stylesheet" href="https://js.arcgis.com/4.18/esri/themes/light/main.css">
+  <script src="https://js.arcgis.com/4.18/"></script>
+  <script>
+
+  require([
+    "esri/config",
+    "esri/Map",
+    "esri/views/MapView",
+
+    "esri/Graphic",
+    "esri/layers/GraphicsLayer"
+
+    ], function(esriConfig,Map, MapView, Graphic, GraphicsLayer, ) {
+
+  esriConfig.apiKey = "AAPKaaf84bda91ad449192d19d43a8bd56f0lU9mp0HC9lhKN933s7ZTPNuXCGfh4RDs-cjQOV2mzpwAAsS4VDAoEl92nx7BPpI4";
+
+  const map = new Map({
+    basemap: "gray" //Basemap layer service
+  });
+
+  const view = new MapView({
+    map: map,
+    center: [-79.2469,43.1594], //Longitude, , 
+    zoom: 15,
+    container: "viewDiv"
+ });
+
+ const graphicsLayer = new GraphicsLayer();
+ map.add(graphicsLayer);
+
+ const point = { //Create a point
+    type: "point",
+    longitude: -79.23597851653854,
+    latitude: 43.16446994782346
+ };
+
+ const simpleMarkerSymbol = {
+    type: "simple-marker",
+    color: [226, 119, 40],  // Orange
+    outline: {
+        color: [255, 255, 255], // White
+        width: 1
+    }
+ };
+
+ const pointGraphic = new Graphic({
+    geometry: point,
+    symbol: simpleMarkerSymbol
+ });
+ graphicsLayer.add(pointGraphic);
+
+
+    // Create a line geometry
+ 
+
+  // Create a polygon geometry
+ const polygon = {
+    type: "polygon",
+    rings: [
+        [-79.25277271736492, 43.1583632607074], //Longitude, latitude , 
+        [-79.2512733625309, 43.159423228724904], //Longitude, latitude , 
+        [-79.25045327712297, 43.15878049996665], //Longitude, latitude  , 
+        [-79.25012872984232, 43.158629844152834],   //Longitude, latitude , 
+         [-79.25040902067502, 43.15831972678815],
+         [-79.25040633846407, 43.15702983689548] //Longitude, latitude  
+    ]
+ };
+
+ const simpleFillSymbol = {
+    type: "simple-fill",
+    color: [227, 139, 79, 0.8],  // Orange, opacity 80%
+    outline: {
+        color: [255, 255, 255],
+        width: 1
+    }
+ };
+
+ const popupTemplate = {
+    title: "{Name}",
+    content: "{Description}"
+ }
+ const attributes = {
+    Name: "Montebello Park",
+    Description: "Relaxed spot with a bandshell and Fountain"
+ }
+
+ const polygonGraphic = new Graphic({
+    geometry: polygon,
+    symbol: simpleFillSymbol,
+
+    attributes: attributes,
+    popupTemplate: popupTemplate
+
+ });
+ graphicsLayer.add(polygonGraphic);
+
+
+
+
+
+ 
+ });
+</script>
+</head>
+<body>
+  <h1> Places i'd be visting after the lockdown</h1>
+  <div id="viewDiv"></div>
+</body>
+</html>
